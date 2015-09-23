@@ -68,6 +68,9 @@ vector<string> indexClientKey;
 vector<string> indexClientRRN;
 vector<string> indexNumberRRN;
 vector<string> indexNumberKey;
+void readIndexCity();
+void readIndexClient();
+void readIndexNumber();
 
 int main(int argc, char* argv[]){
 	srand(time(0));
@@ -1575,4 +1578,76 @@ void writeIndexNumber(){
 	indexFlag = false;
 	remarkFile.write(reinterpret_cast<char*>(&indexFlag), sizeof(indexFlag) );
 	remarkFile.close();
+}
+void readIndexCity(){
+	indexCityKey.clear();
+	indexCityRRN.clear();
+	ifstream readFile("IndexCity.bin",ios::binary);
+	readFile.seekg(HeaderSize);
+	int cont = 0;
+	while(true){
+		if(readFile.eof()){
+			break;
+		}
+
+		int IndexLlaveCity;
+		unsigned long IndexLlaveRRN;
+		stringstream ss,ssRRN;
+		readFile.read( reinterpret_cast<char*>(&IndexLlaveCity), sizeof(IndexLlaveCity) );
+  		readFile.read( reinterpret_cast<char*>(&IndexLlaveRRN), sizeof(IndexLlaveRRN) );
+		ss << IndexLlaveCity;
+		ssRRN << IndexLlaveRRN;
+  		indexCityKey.push_back(ss.str());
+  		indexCityRRN.push_back(ssRRN.str());
+		
+	}
+	readFile.close();
+}
+void readIndexClient(){
+	indexClientKey.clear();
+	indexClientRRN.clear();
+	ifstream readFile("IndexClient.bin",ios::binary);
+	readFile.seekg(HeaderSize);
+	int cont = 0;
+	while(true){
+		if(readFile.eof()){
+			break;
+		}
+
+		int IndexLlaveClient;
+		unsigned long IndexLlaveRRN;
+		stringstream ss,ssRRN;
+		readFile.read( reinterpret_cast<char*>(&IndexLlaveClient), sizeof(IndexLlaveClient) );
+  		readFile.read( reinterpret_cast<char*>(&IndexLlaveRRN), sizeof(IndexLlaveRRN) );
+		ss << IndexLlaveClient;
+		ssRRN << IndexLlaveRRN;
+  		indexClientKey.push_back(ss.str());
+  		indexClientRRN.push_back(ssRRN.str());
+		
+	}
+	readFile.close();
+}
+void readIndexNumber(){
+	indexNumberKey.clear();
+	indexNumberRRN.clear();
+	ifstream readFile("IndexCity.bin",ios::binary);
+	readFile.seekg(HeaderSize);
+	int cont = 0;
+	while(true){
+		if(readFile.eof()){
+			break;
+		}
+
+		int IndexLlaveNumeros;
+		unsigned long IndexLlaveRRN;
+		stringstream ss,ssRRN;
+		readFile.read( reinterpret_cast<char*>(&IndexLlaveNumeros), sizeof(IndexLlaveNumeros) );
+  		readFile.read( reinterpret_cast<char*>(&IndexLlaveRRN), sizeof(IndexLlaveRRN) );
+		ss << IndexLlaveNumeros;
+		ssRRN << IndexLlaveRRN;
+  		indexNumberKey.push_back(ss.str());
+  		indexNumberRRN.push_back(ssRRN.str());
+		
+	}
+	readFile.close();
 }
