@@ -86,6 +86,7 @@ void CompactarNumber();
 void readIndexCity();
 void readIndexClient();
 void readIndexNumber();
+void Tarifa(unsigned long );
 
 int main(int argc, char* argv[]){
 	srand(time(0));
@@ -1979,4 +1980,127 @@ int PosicionBusquedaOrdenadaAlIndiceLong(vector<string> indexKey  , unsigned lon
     	}
     }
     return -1;
+}
+void Tarifa(unsigned long key){
+	
+	vector<int> vectorNumero;
+	int rrn=-1, recordNumber = 0,endFile = 0;
+	bool indexindexFlag = 0;
+	ifstream readFileNumber("Numeros.bin",ios::binary);
+	readFileNumber.read( reinterpret_cast<char*>(&rrn), sizeof(int) );
+	readFileNumber.read( reinterpret_cast<char*>(&recordNumber), sizeof(int) );
+	readFileNumber.read( reinterpret_cast<char*>(&indexindexFlag), sizeof(bool)  );
+	readFileNumber.seekg(sizeof(int)+sizeof(int)+sizeof(bool));
+	while(endFile < recordNumber){
+		char Numero[9];
+		char Id[14];
+		char IdTemporal[14];
+		readFileNumber.read((char*)Numero, sizeof(Numero));
+		readFileNumber.read((char*)Id, sizeof(Id));
+		if( Numero[0] != '*'){
+			stringstream ss,ssNumber,ssKey;
+			for (int i = 0; i < sizeof(Id); ++i){
+				ss<<Id[i];
+			}
+			for (int i = 0; i < sizeof(Numero); ++i){
+				ssNumber<<Numero[i];
+			}
+			ssKey<<key;
+			for (int i = 0; i < sizeof(Id); ++i)
+			{
+				IdTemporal[i] = ssKey.str()[i];
+			}
+			if(strcmp(Id,IdTemporal) == 0){
+				vectorNumero.push_back(atoi(ssNumber.str().c_str()));
+			}
+		}
+		endFile++;
+
+	}
+	if(vectorNumero.size() == 0){
+		cout << "No se encontro el cliente o no tiene registrado un numero"<< endl;
+		return;
+	}
+
+	readFileNumber.close();
+	ifstream readFile("Llamadas.bin",ios::binary);
+	readFile.seekg(0);
+	rrn=-1;
+	recordNumber = 0;
+	endFile=0;
+	indexindexFlag = 0;
+	int Id;
+	double TarifaTotal = 0;
+	unsigned long SegundosTiempoTotal=0;
+	char Numero[9];
+	char FechaInicio[20];
+	char FechaFinal[20];
+	char NumDestino[9];
+	readFile.read( reinterpret_cast<char*>(&rrn), sizeof(int) );
+	readFile.read( reinterpret_cast<char*>(&recordNumber), sizeof(int) );
+	readFile.read( reinterpret_cast<char*>(&indexindexFlag), sizeof(bool)  );
+	readFile.seekg(sizeof(int)+sizeof(int)+sizeof(bool));
+	for (int i = 0; i < vectorNumero.size(); i++){
+		while(endFile < recordNumber){
+		char NumeroTemporal[9];
+		readFile.read(reinterpret_cast<char*>(&Id), sizeof(Id));
+		readFile.read((char*)Numero, sizeof(Numero));
+		readFile.read((char*)FechaInicio, sizeof(FechaInicio));
+		readFile.read((char*)FechaFinal, sizeof(FechaFinal));
+		readFile.read((char*)NumDestino, sizeof(NumDestino));
+		stringstream ss, TiempoInicio, TiempoFinal,ssNumeroTemporal;
+		//cout << Numero << "||" << FechaInicio << "||"<< FechaFinal << "||" <<NumDestino;
+		unsigned long SegundosTiempoInicio=0, SegundosTiempoFinal=0;
+		int DiferenciaTiempo = 0;
+		for (int j = 0; j < sizeof(FechaInicio); ++j){
+			TiempoInicio << FechaInicio[j];
+		}
+		for (int k = 0; k < sizeof(FechaFinal); ++k){
+			TiempoFinal << FechaFinal[k];
+		}
+		ssNumeroTemporal << vectorNumero.at(i);
+		for (int j = 0; j < sizeof(Numero); ++j)
+		{			
+			NumeroTemporal[j] = ssNumeroTemporal.str()[j];
+		}
+		
+		if ( strcmp(Numero, NumeroTemporal) == 0){
+			SegundosTiempoInicio += atol(TiempoInicio.str().substr(0,4).c_str())* 31536000;
+			SegundosTiempoInicio += atol(TiempoInicio.str().substr(5,2).c_str())* 2419200;
+			SegundosTiempoInicio += atol(TiempoInicio.str().substr(8,2).c_str())* 86400;
+			SegundosTiempoInicio += atol(TiempoInicio.str().substr(11,2).c_str())* 3600;
+			SegundosTiempoInicio += atol(TiempoInicio.str().substr(14,2).c_str())* 60 + atol(TiempoInicio.str().substr(17,2).c_str());
+
+			SegundosTiempoFinal += atol(TiempoFinal.str().substr(0,4).c_str())* 31536000;
+			SegundosTiempoFinal += atol(TiempoFinal.str().substr(5,2).c_str())* 2419200;
+			SegundosTiempoFinal += atol(TiempoFinal.str().substr(8,2).c_str())* 86400;
+			SegundosTiempoFinal += atol(TiempoFinal.str().substr(11,2).c_str())* 3600;
+			SegundosTiempoFinal += atol(TiempoFinal.str().substr(14,2).c_str())* 60 + atol(TiempoFinal.str().substr(17,2).c_str());
+
+			DiferenciaTiempo = SegundosTiempoFinal - SegundosTiempoInicio;
+			SegundosTiempoTotal += (SegundosTiempoFinal - SegundosTiempoInicio);
+
+			if(atoi(TiempoInicio.str().substr(11,2).c_str())>= 0 && atoi(TiempoFinal.str().substr(11,2).c_str())< 8){
+				TarifaTotal += ((DiferenciaTiempo/60) * 0.01);
+			}else if(atoi(TiempoInicio.str().substr(11,2).c_str())>= 8 && atoi(TiempoFinal.str().substr(11,2).c_str())< 16){
+				TarifaTotal += ((DiferenciaTiempo/60) * 0.04);
+			}else if(atoi(TiempoInicio.str().substr(11,2).c_str())>= 16 && atoi(TiempoFinal.str().substr(11,2).c_str())< 24){
+				TarifaTotal += ((DiferenciaTiempo/60) * 0.05);
+			}
+		
+		}
+		endFile++;
+	}
+	readFile.close();
+	}
+	if(vectorNumero.size() != 0){
+		cout << "Los numeros que el cliente posee son: "<<endl;
+
+		for (int i = 0; i < vectorNumero.size(); ++i)
+			cout << "\t* " << vectorNumero.at(i) << endl;
+
+		cout << "El cliente hablo " << SegundosTiempoTotal << " segundos en total." << endl;
+		cout << "La tarifa total del numero " << key << " es de $"<< TarifaTotal<<endl;
+
+	}	
 }
