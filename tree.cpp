@@ -112,6 +112,184 @@ void Tree::Listar(){
 	}
 	cout << "----------------------------------------"<<endl;
 }
+void Tree::Agregar(Index key){
+	bool firstTime = true;
+	while(true){
+		if(key.getKeys() == -2){
+
+			for (int i = 0; i < arbol.size(); ++i){
+				cout<< arbol.at(i)->toString()<<endl;	
+			}
+			cout << "----------------------------------------"<<endl;
+			return;
+		}
+		if (root == -1){
+			vector<Index> rootKeys;
+			rootKeys.push_back(key);
+			Node* rootNode = new Node();
+			rootNode->setKeys(rootKeys);
+			arbol.push_back(rootNode);
+			arbol.at(0)->setFather(-1);
+			arbol.at(0)->setPage(0);
+			root = 0;
+			return;
+		} 
+		Node* currentNode;
+		if(firstTime){
+
+			currentNode = arbol.at(root);
+			firstTime = false;
+		}
+		vector<Index> tempKeys = currentNode->getKeys();
+		if(currentNode->getSons().size() == 0){// si es una hoja
+			// insertar
+			if(currentNode->getKeys().size() !=0 ){// si tiene elementos
+				if(currentNode->getKeys().size() < orden-1){// que el numero de claves no sobrepasen el limite
+					int posicion = BinarySearch(currentNode->getKeys(), key.getKeys());
+					
+					if(posicion == -1){
+						tempKeys.push_back( key);
+						currentNode->setKeys(tempKeys);
+						break;
+					}else{
+						tempKeys.insert(tempKeys.begin() + posicion, key);
+						currentNode->setKeys(tempKeys);
+						break;
+					}
+				}else{//proceso de "quebrar" el nodo	
+					int posicion = BinarySearch(currentNode->getKeys(), key.getKeys());
+					if(posicion == -1){
+						tempKeys.push_back( key);
+						currentNode->setKeys(tempKeys);
+					}else{
+						tempKeys.insert(tempKeys.begin() + posicion, key);
+						currentNode->setKeys(tempKeys);
+					}		
+					Split(currentNode->getPage());
+					break;
+				}
+			}else{//si el arbol esta vacio, osea, es la primera insercion
+				
+				break;
+			}//fin insertar
+		}else{
+			while(true){//nos movemos hasta el nodo donde deberia ir la clave (hasta la hoja)
+				int posicion = BinarySearch(currentNode->getKeys(), key.getKeys());
+				if(posicion != -1){
+					currentNode = arbol.at(currentNode->getSons().at(posicion));		
+				}else{				
+					currentNode = arbol.at(currentNode->getSons().at( currentNode->getSons().size() -1));	
+				}
+				if(currentNode->getSons().size() == 0){
+					break;
+
+				}
+			}
+		}
+	}
+}//fin agregar
+
+void Tree::Split(int page){
+	Node* nodoActual = arbol.at(page);
+	int mitad = (nodoActual->getKeys().size()-1)/2;
+	vector<Index> keys;
+	vector<int> sons;
+	for (int i = mitad+1; i < nodoActual->getSons().size(); ++i){
+		sons.push_back(nodoActual->getSons().at(i));
+	}
+
+	for (int i = mitad+1; i < nodoActual->getKeys().size(); ++i){
+		keys.push_back(nodoActual->getKeys().at(i));
+	}
+
+	vector<int> tempBorrarSons = nodoActual->getSons();
+	for (int i = mitad+1; i <nodoActual->getSons().size(); ++i){
+		tempBorrarSons.pop_back();
+	}
+	arbol.at(page)->setSons(tempBorrarSons);
+
+	Node* segundaMitad = new Node();
+	segundaMitad->setKeys(keys);
+	segundaMitad->setSons(sons);
+	arbol.push_back(segundaMitad);
+	//
+	for (int i = 0; i < segundaMitad->getSons().size(); ++i)
+	{
+		arbol.at(segundaMitad->getSons().at(i) )->setFather(arbol.size()-1);
+	}
+	arbol.at(arbol.size()-1)->setPage(arbol.size()-1);
+	arbol.at(arbol.size()-1)->setFather(nodoActual->getFather());
+	//int sizeAfterDivision = arbol.size();
+	if(nodoActual->getKeys().size() >= orden-1){
+		int newFather = Promote(page, mitad );
+		/*arbol.at(page)->setFather(newFather);
+		arbol.at(sizeAfterDivision-1)->setFather(newFather);*/
+	}
+}
+int Tree::Promote(int page, int mitad){
+	int pageFather = arbol.at(page)->getFather();
+	if( pageFather == -1 ){// si estamos dividiendo la raiz
+		Index keyPromoted = arbol.at(page)->getKeys().at(mitad);
+		vector<Index> keyForNewRoot;
+		keyForNewRoot.push_back(keyPromoted);// solo es una key asi que solo se le hace push_back
+		Node* newRoot = new Node();
+		newRoot->setKeys(keyForNewRoot);
+		arbol.push_back(newRoot);
+		vector<Index> tempBorrarKeys = arbol.at(page)->getKeys();
+		for (int i = mitad; i <= orden-1; ++i){
+			tempBorrarKeys.pop_back();
+		}
+		vector<int> newSonsForNewRoot;
+		newSonsForNewRoot.push_back(page);
+		newSonsForNewRoot.push_back(arbol.size()-2);
+		arbol.at(arbol.size()-1)->setPage(arbol.size()-1);
+		arbol.at(page)->setFather(arbol.size()-1);
+		arbol.at(arbol.size()-2)->setFather(arbol.size()-1);
+		arbol.at(arbol.size()-1)->setFather(-1);
+		arbol.at(arbol.size()-1)->setSons(newSonsForNewRoot);// <----
+		arbol.at(page)->setKeys(tempBorrarKeys);
+		root = arbol.size()-1;
+		return arbol.size()-1;
+	}
+	Node* currentNode = arbol.at(arbol.at(page)->getFather());
+	Index keyPromoted = arbol.at(page)->getKeys().at(mitad);
+	vector<Index> tempKeys = currentNode->getKeys();
+	int posicion = BinarySearch(currentNode->getKeys(),keyPromoted.getKeys());
+	vector<int> tempSons;
+	
+	if(posicion == -1){
+		for (int i = 0; i < currentNode->getSons().size()-1; ++i){	
+			tempSons.push_back(currentNode->getSons().at(i));
+		}
+		tempSons.push_back(page);
+		tempSons.push_back(arbol.size()-1);		
+		tempKeys.push_back( keyPromoted);		
+		currentNode->setKeys(tempKeys);	
+		currentNode->setSons(tempSons);
+	}else{
+		for (int i = 0; i < posicion; ++i){	
+			tempSons.push_back(currentNode->getSons().at(i));
+		}
+		tempSons.push_back(page);
+		tempSons.push_back(arbol.size()-1);
+		for (int i = posicion+1; i < currentNode->getSons().size(); ++i){	
+			tempSons.push_back(currentNode->getSons().at(i));
+		}
+		tempKeys.insert(tempKeys.begin() + posicion, keyPromoted);
+		currentNode->setKeys(tempKeys);
+		currentNode->setSons(tempSons);
+	}	
+	vector<Index> tempBorrarKeys = arbol.at(page)->getKeys();
+	for (int i = mitad; i <= orden-1; ++i){
+		tempBorrarKeys.pop_back();
+	}
+
+	arbol.at(page)->setKeys(tempBorrarKeys);
+	if(currentNode->getKeys().size() >= orden){
+		Split(pageFather);
+	}
+	return currentNode->getPage();
+}
 void Tree::Eliminar(Index key){
 	int cont = 0;
 	if(key.getKeys() == -2){
@@ -345,4 +523,19 @@ int Tree::PaginaPredecesorInmediato(Node* currentNode,int posicion){
 		}else
 			return currentNode->getPage();
 	}
+}
+int Tree::Buscar(unsigned long key){
+	Node * currentNode = arbol.at(root);
+	while(true){//nos movemos hasta el nodo donde deberia ir la clave (hasta la hoja)
+		int posicion = EliminarBinarySearch(currentNode->getKeys(), key);
+		if(posicion != -1){
+			return currentNode->getKeys().at(posicion).getTreeRRN();
+		}else{				
+			if(currentNode->getSons().size() == 0){
+				return -1;
+			}
+			currentNode = arbol.at(currentNode->getSons().at(BinarySearch(currentNode->getKeys(), key)));	
+		}
+	}
+	return -1;
 }
