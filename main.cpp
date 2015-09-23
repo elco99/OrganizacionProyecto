@@ -60,6 +60,9 @@ void buscarNumberIndexado( int);
 void buscarCity(int);
 void buscarClient( int);
 void buscarNumber( unsigned long );
+void CrearArbolCity();
+void CrearArbolClient();
+void CrearArbolNumber();
 >>>>>>> 95343f5146c57e1ee8b04d47466e81b4f7db7090
 const int HeaderSize = sizeof(int) + sizeof(int) + sizeof(bool);
 vector<string> indexCityRRN;
@@ -1370,6 +1373,107 @@ void modificarNumber(){
 	writeFile.close();
 	/*int position2 = PosicionIngresoOrdenadoAlIndice( indexCityKey  , atoi(ss.str().c_str()) );
 	indexCityKey.insert(indexCityKey.begin()+ position2, ss.str());*/
+}
+void CrearArbolCity(){
+	int rrn=-1, recordNumber = 0, endFile = 0,cont = 0;
+	unsigned long agregado = 0;
+	bool indexindexFlag = 0;
+	
+	ifstream readFile("Ciudades.bin",ios::binary);
+	readFile.read( reinterpret_cast<char*>(&rrn), sizeof(int) );
+	readFile.read( reinterpret_cast<char*>(&recordNumber), sizeof(int) );
+	readFile.read( reinterpret_cast<char*>(&indexindexFlag), sizeof(bool)  );
+	readFile.seekg(sizeof(int)+sizeof(int)+sizeof(bool));
+ 	while(endFile < recordNumber){
+ 		char IdCiudad[4];
+		char NameCiudad[40];
+		readFile.read((char*)IdCiudad, sizeof(IdCiudad));
+		readFile.read((char*)NameCiudad, sizeof(NameCiudad));
+		stringstream ss;
+		for (int i = 0; i < sizeof(IdCiudad); i++){
+			ss << IdCiudad[i];
+		}
+		if( IdCiudad[0] != '*'){
+			agregado = atol(ss.str().c_str());
+			Index ingresado(agregado,cont);
+			TreeCity.Agregar(ingresado);
+		}
+		endFile++;
+		cont++;
+
+	}
+	readFile.close();
+	//TreeCity.Listar();
+}
+void CrearArbolClient(){
+	int rrn=-1, recordNumber = 0, endFile = 0;
+	unsigned long agregado = 0;
+	bool indexindexFlag = 0;
+	int cont = 0;
+	
+	ifstream readFile("Clientes.bin",ios::binary);
+	readFile.read( reinterpret_cast<char*>(&rrn), sizeof(int) );
+	readFile.read( reinterpret_cast<char*>(&recordNumber), sizeof(int) );
+	readFile.read( reinterpret_cast<char*>(&indexindexFlag), sizeof(bool)  );
+	readFile.seekg(sizeof(int)+sizeof(int)+sizeof(bool));
+	while(endFile < recordNumber){
+		char IdClient[14];
+		char NameClient[40];
+		char Gender[2];
+		char IdCiudad[4];
+		readFile.read((char*)IdClient, sizeof(IdClient));
+		readFile.read((char*)NameClient, sizeof(NameClient));
+		readFile.read((char*)Gender, sizeof(Gender));
+		readFile.read((char*)IdCiudad, sizeof(IdCiudad));
+		stringstream ss;
+		for (int i = 0; i < sizeof(IdClient); i++){
+			ss << IdClient[i];
+		}
+		
+		if( IdClient[0] != '*'){
+			agregado = atol(ss.str().c_str());
+			Index ingresado(agregado,cont);
+			TreeClient.Agregar(ingresado);
+		}
+		//cout << agregado<<"|||||||"<<endFile<<endl;
+		endFile++;
+		cont ++;
+
+	}
+	readFile.close();
+	//TreeClient.Listar();
+}
+void CrearArbolNumber(){
+	int rrn=-1, recordNumber = 0, endFile = 0;
+	unsigned long agregado = 0;
+	bool indexindexFlag = 0;
+	int cont = 0;
+	
+	ifstream readFile("Numeros.bin",ios::binary);
+	readFile.read( reinterpret_cast<char*>(&rrn), sizeof(int) );
+	readFile.read( reinterpret_cast<char*>(&recordNumber), sizeof(int) );
+	readFile.read( reinterpret_cast<char*>(&indexindexFlag), sizeof(bool)  );
+	readFile.seekg(sizeof(int)+sizeof(int)+sizeof(bool));
+	while(endFile < recordNumber){
+		char Numero[9];
+		char Id[14];
+		readFile.read((char*)Numero, sizeof(Numero));
+		readFile.read((char*)Id, sizeof(Id));
+		stringstream ss;
+		for (int i = 0; i < sizeof(Numero); i++){
+			ss << Numero[i];
+		}
+		if( Numero[0] != '*'){
+			agregado = atol(ss.str().c_str());
+			Index ingresado(agregado,cont);
+			TreeNumber.Agregar(ingresado);
+		}
+		endFile++;
+		cont++;
+
+	}
+	readFile.close();
+	//TreeNumber.Listar();
 }
 //busqueda directa con index
 void buscarCityIndexado(int key){
