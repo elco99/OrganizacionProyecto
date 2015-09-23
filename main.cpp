@@ -68,6 +68,9 @@ vector<string> indexClientKey;
 vector<string> indexClientRRN;
 vector<string> indexNumberRRN;
 vector<string> indexNumberKey;
+void CompactarCity();
+void CompactarClient();
+void CompactarNumber();
 void readIndexCity();
 void readIndexClient();
 void readIndexNumber();
@@ -1650,4 +1653,124 @@ void readIndexNumber(){
 		
 	}
 	readFile.close();
+}
+void CompactarCity(){
+	ifstream readFile("Ciudades.bin");
+	ofstream writeFile("Tmp.bin");
+	int rrn;
+	int recordNumber;
+	bool indexFlag;
+	readFile.read((char*)&rrn, sizeof(int));
+	readFile.read((char*)&recordNumber, sizeof(int));
+	readFile.read((char*)&indexFlag, sizeof(bool));
+	rrn=-1;
+	writeFile.write((char*)&rrn, sizeof(rrn));
+	writeFile.write((char*)&recordNumber, sizeof(recordNumber));
+	writeFile.write((char*)&indexFlag, sizeof(indexFlag));
+	int cont=0;
+	int recordNumberTmp=0;
+	while(cont<recordNumber){
+		char IdCiudad[4];
+		char NombreCiudad[40];
+		readFile.read((char*)IdCiudad, sizeof(IdCiudad));
+		readFile.read((char*)NombreCiudad, sizeof(NombreCiudad));
+		if (IdCiudad[0]!='*'){
+			writeFile.write((char*)IdCiudad, sizeof(IdCiudad));
+			writeFile.write((char*)NombreCiudad, sizeof(NombreCiudad));
+			recordNumberTmp++;
+		}
+		cont++;
+	}
+	readFile.close();
+	writeFile.seekp( sizeof(int));
+	writeFile.write((char*)&recordNumberTmp, sizeof(int));
+	writeFile.close();
+	Tree newTree(orden);
+	TreeCity = newTree;
+	CrearArbolCity();
+	remove("Ciudades.bin");
+	rename("Tmp.bin","Ciudades.bin");
+	IndexCity();
+}
+void CompactarClient(){
+	ifstream readFile("Clientes.bin");
+	ofstream writeFile("Tmp.bin");
+	int rrn;
+	int recordNumber;
+	bool indexFlag;
+	readFile.read((char*)&rrn, sizeof(int));
+	readFile.read((char*)&recordNumber, sizeof(int));
+	readFile.read((char*)&indexFlag, sizeof(bool));
+	rrn=-1;
+	writeFile.write((char*)&rrn, sizeof(rrn));
+	writeFile.write((char*)&recordNumber, sizeof(recordNumber));
+	writeFile.write((char*)&indexFlag, sizeof(indexFlag));
+	int cont=0;
+	int recordNumberTmp=0;
+	while(cont<recordNumber){
+		char IdClient[14];
+		char NameClient[40];
+		char Gender[2];
+		char IdCiudad[4];
+		readFile.read((char*)IdClient, sizeof(IdClient));
+		readFile.read((char*)NameClient, sizeof(NameClient));
+		readFile.read((char*)Gender, sizeof(Gender));
+		readFile.read((char*)IdCiudad, sizeof(IdCiudad));
+		if (IdClient[0]!='*'){
+			writeFile.write((char*)IdClient, sizeof(IdClient));
+			writeFile.write((char*)NameClient, sizeof(NameClient));
+			writeFile.write((char*)Gender, sizeof(Gender));
+			writeFile.write((char*)IdCiudad, sizeof(IdCiudad));
+			recordNumberTmp++;
+		}
+		cont++;
+	}
+	readFile.close();
+	writeFile.seekp( sizeof(int));
+	writeFile.write((char*)&recordNumberTmp, sizeof(int));
+	writeFile.close();
+	Tree newTree(orden);
+	TreeCity = newTree;
+	CrearArbolClient();
+	remove("Clientes.bin");
+	rename("Tmp.bin","Clientes.bin");
+	IndexClient();
+}
+void CompactarNumber(){
+	ifstream readFile("Numeros.bin");
+	ofstream writeFile("Tmp.bin");
+	int rrn;
+	int recordNumber;
+	bool indexFlag;
+	readFile.read((char*)&rrn, sizeof(int));
+	readFile.read((char*)&recordNumber, sizeof(int));
+	readFile.read((char*)&indexFlag, sizeof(bool));
+	rrn=-1;
+	writeFile.write((char*)&rrn, sizeof(rrn));
+	writeFile.write((char*)&recordNumber, sizeof(recordNumber));
+	writeFile.write((char*)&indexFlag, sizeof(indexFlag));
+	int cont=0;
+	int recordNumberTmp=0;
+	while(cont<recordNumber){
+		char Numero[9];
+		char Id[14];
+		readFile.read((char*)Numero, sizeof(Numero));
+		readFile.read((char*)Id, sizeof(Id));
+		if (Numero[0]!='*'){
+			writeFile.write((char*)&Numero, sizeof(Numero));
+			writeFile.write((char*)&Id, sizeof(Id));
+			recordNumberTmp++;
+		}
+		cont++;
+	}
+	readFile.close();
+	writeFile.seekp( sizeof(int));
+	writeFile.write((char*)&recordNumberTmp, sizeof(int));
+	writeFile.close();
+	Tree newTree(orden);
+	TreeCity = newTree;
+	CrearArbolCity();
+	remove("Numeros.bin");
+	rename("Tmp.bin","Numeros.bin");
+	IndexCity();
 }
