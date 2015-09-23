@@ -24,7 +24,9 @@ void IndexNumber();
 <<<<<<< HEAD
 int PosicionIngresoOrdenadoAlIndice(vector<string>,  int);
 int PosicionIngresoOrdenadoAlIndiceLong(vector<string>, unsigned long );
-void writeIndex(vector<string> ,vector<string> , string , string );
+void writeIndexCity( );
+void writeIndexClient( );
+void writeIndexNumber( );
 void borrarCity( int );
 void borrarClient( long );
 void borrarNumber( int );
@@ -572,27 +574,7 @@ void ListCall(){
 	}
 	readFile.close();
 }
-void writeIndex(vector<string> indexRRN,vector<string> indexKey, string FileName, string FileFlag){
-	ofstream markFile("Ciudades.bin");
-	markFile.seekp(sizeof(int)+sizeof(int));
 
-	bool flag = true;
-	markFile.write(reinterpret_cast<char*>(&flag), sizeof(flag) );
-	markFile.close();
-	ofstream outputFile("IndexCity.bin");
-	for (int i = 0; i < indexRRN.size(); ++i){		
-  		outputFile.write( reinterpret_cast<char*>(&indexKey[i]), sizeof(indexKey[i]) );
-  		outputFile.write( reinterpret_cast<char*>(&indexRRN[i]), sizeof(indexRRN[i]) );
-	}
-	outputFile.close();
-	ofstream remarkFile("Ciudades.bin");
-	remarkFile.seekp(sizeof(int)+sizeof(int));
-	flag = false;
-	remarkFile.write(reinterpret_cast<char*>(&flag), sizeof(flag) );
-	remarkFile.close();
-}
-=======
->>>>>>> 95343f5146c57e1ee8b04d47466e81b4f7db7090
 void IndexCity(){
 	indexCityKey.clear();
 	indexCityRRN.clear();
@@ -1534,4 +1516,63 @@ void buscarNumber( int key){
 		cout << "El registro no se encuentra entre los datos.";
 	
 	readFile.close();
+}
+void writeIndexCity(){
+	ofstream markFile("Ciudades.bin");
+	markFile.seekp(sizeof(int)+sizeof(int));
+
+	bool indexFlag = true;
+	markFile.write(reinterpret_cast<char*>(&indexFlag), sizeof(indexFlag) );
+	markFile.close();
+	ofstream outputFile("IndexCity.bin");
+	for (int i = 0; i < indexCityRRN.size(); i++){	
+		int llave = atoi(indexCityKey[i].c_str());
+		unsigned long rrn = atol(indexCityRRN[i].c_str());	
+  		outputFile.write( reinterpret_cast<char*>(&llave), sizeof(int) );
+  		outputFile.write( reinterpret_cast<char*>(&rrn), sizeof(long) );
+	}
+	outputFile.close();
+	ofstream remarkFile("Ciudades.bin");
+	remarkFile.seekp(sizeof(int)+sizeof(int));
+	indexFlag = false;
+	remarkFile.write(reinterpret_cast<char*>(&indexFlag), sizeof(indexFlag) );
+	remarkFile.close();
+}
+void writeIndexClient(){
+	ofstream markFile("Clientes.bin");
+	markFile.seekp(sizeof(int)+sizeof(int));
+
+	bool indexFlag = true;
+	markFile.write(reinterpret_cast<char*>(&indexFlag), sizeof(indexFlag) );
+	markFile.close();
+	ofstream outputFile("IndexClient.bin");
+	for (int i = 0; i < indexClientRRN.size(); i++){		
+  		outputFile.write( reinterpret_cast<char*>(&indexClientKey[i]), sizeof(indexClientKey[i]) );
+  		outputFile.write( reinterpret_cast<char*>(&indexClientRRN[i]), sizeof(indexClientRRN[i]) );
+	}
+	outputFile.close();
+	ofstream remarkFile("Clientes.bin");
+	remarkFile.seekp(sizeof(int)+sizeof(int));
+	indexFlag = false;
+	remarkFile.write(reinterpret_cast<char*>(&indexFlag), sizeof(indexFlag) );
+	remarkFile.close();
+}
+void writeIndexNumber(){
+	ofstream markFile("Numeros.bin");
+	markFile.seekp(sizeof(int)+sizeof(int));
+
+	bool indexFlag = true;
+	markFile.write(reinterpret_cast<char*>(&indexFlag), sizeof(indexFlag) );
+	markFile.close();
+	ofstream outputFile("IndexNumeros.bin");
+	for (int i = 0; i < indexNumberRRN.size(); i++){		
+  		outputFile.write( reinterpret_cast<char*>(&indexNumberKey[i]), sizeof(indexNumberKey[i]) );
+  		outputFile.write( reinterpret_cast<char*>(&indexNumberRRN[i]), sizeof(indexNumberRRN[i]) );
+	}
+	outputFile.close();
+	ofstream remarkFile("Numeros.bin");
+	remarkFile.seekp(sizeof(int)+sizeof(int));
+	indexFlag = false;
+	remarkFile.write(reinterpret_cast<char*>(&indexFlag), sizeof(indexFlag) );
+	remarkFile.close();
 }
