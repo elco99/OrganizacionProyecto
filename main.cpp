@@ -68,6 +68,15 @@ vector<string> indexClientKey;
 vector<string> indexClientRRN;
 vector<string> indexNumberRRN;
 vector<string> indexNumberKey;
+vector<Index> IndexArbolCity;
+int orden = 7;
+Tree TreeCity(orden);
+Tree TreeClient(orden);
+Tree TreeNumber(orden);
+void BuscarCityArbol(int);
+void BuscarClientArbol(int);
+void BuscarNumberArbol(int);
+int PosicionBusquedaOrdenadaAlIndiceLong(vector<string>  , unsigned long );
 void CompactarCity();
 void CompactarClient();
 void CompactarNumber();
@@ -1773,4 +1782,97 @@ void CompactarNumber(){
 	remove("Numeros.bin");
 	rename("Tmp.bin","Numeros.bin");
 	IndexCity();
+}
+void BuscarCityArbol(int rrn){
+	char IdCiudad[4];
+	char NameCiudad[40];
+	ifstream readFile("Ciudades.bin",ios::binary);	
+	readFile.seekg(HeaderSize + (sizeof(IdCiudad) + sizeof(NameCiudad)) * rrn );
+	readFile.read((char*)IdCiudad, sizeof(IdCiudad));
+	readFile.read((char*)NameCiudad, sizeof(NameCiudad));
+	cout <<"----------------------------------------------------------------------------"<<endl;
+	cout << "Id Ciudad: "<<IdCiudad <<endl;
+	cout << "Nombre de la ciudad: " <<NameCiudad<<endl;	
+	readFile.close();
+}
+void BuscarClientArbol(int rrn){
+	char IdClient[14];
+	char NameClient[40];
+	char Gender[2];
+	char IdCiudad[4];
+	ifstream readFile("Clientes.bin",ios::binary);
+	readFile.seekg(HeaderSize + (sizeof(IdClient) + sizeof(NameClient)+ sizeof(Gender)+ sizeof(IdCiudad)) * rrn );
+	readFile.read((char*)IdClient, sizeof(IdClient));
+	readFile.read((char*)NameClient, sizeof(NameClient));
+	readFile.read((char*)Gender, sizeof(Gender));
+	readFile.read((char*)IdCiudad, sizeof(IdCiudad));
+	cout <<"----------------------------------------------------------------------------"<<endl;
+	cout << "Id: " << IdClient << endl;
+	cout << "Nombre: " << NameClient <<endl; 
+	cout << "Genero: " << Gender << endl;
+	cout << "Id Ciudad: " << IdCiudad <<endl;
+	readFile.close();
+}
+void BuscarNumberArbol(int rrn){
+	char Numero[9];
+	char Id[14];
+	ifstream readFile("Numeros.bin",ios::binary);
+	cout << rrn<< endl;
+	readFile.seekg(HeaderSize + ( sizeof(Numero) + sizeof(Id)) * rrn );
+	readFile.read((char*)Numero, sizeof(Numero));
+	readFile.read((char*)Id, sizeof(Id));
+	cout <<"----------------------------------------------------------------------------"<<endl;
+	cout << "Numero: " << Numero << endl;
+	cout << "Id Propietario: " << Id <<endl; 
+	readFile.close();
+}
+int PosicionBusquedaOrdenadaAlIndiceLong(vector<string> indexKey  , unsigned long key){
+    int low = 0;
+    int high = indexKey.size() - 1;
+    int mid;
+    bool avoidInfiniteCicle = false;
+    
+    while(true){
+    	if(low > high)
+    		break;    	
+    	mid = (low + high)/2;
+    	if(key == atol((indexKey.at(mid)).c_str()) )
+    		return mid;
+    	if(key > atol((indexKey.at(mid)).c_str())){
+    		if(mid != indexKey.size() - 1){
+    			if(key < atol((indexKey.at(mid+1)).c_str())){
+    				return -1;
+    			}else{
+    				if(avoidInfiniteCicle && mid == indexKey.size()-2)
+    					return -1;
+    				low = mid;
+    				avoidInfiniteCicle = true;
+    			}
+    		}else{
+    			if(key < atol((indexKey.at(mid)).c_str())){
+    				return -1;
+    			}else{
+    				return -1;
+    			}
+
+    		}
+    	}else{
+    		if(mid != 0){
+    			if(key > atol((indexKey.at(mid-1)).c_str())){
+
+    				return -1;
+    			}else{
+    				high = mid;
+    			}
+    		}else{
+    			if(key < atol((indexKey.at(mid)).c_str())){
+    				return -1;
+    			}else{
+    				return -1;
+    			}
+
+    		}
+    	}
+    }
+    return -1;
 }
