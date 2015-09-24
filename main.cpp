@@ -79,24 +79,33 @@ void readIndexNumber();
 
 int main(int argc, char* argv[]){
 	srand(time(0));
-	int opcion = 0,opcionAdd = 0,opcionEliminar = 0,opcionModificar = 0,opcionListar = 0, opcionBuscar =0, opcionReindexar = 0,opcionCompactar = 0;
+	int opcion = 0,opcionAdd = 0,opcionCrear = 0,opcionEliminar = 0,opcionModificar = 0,opcionListar = 0, opcionBuscar =0, opcionReindexar = 0,opcionCompactar = 0;
 	int opcionListarArbol = 0;
-	CityToBinary();
-	ClientToBinary();
-	CallToBinary();
-	NumberToBinary();
-	IndexCity();
-	IndexClient();
-	IndexNumber();
-	CrearArbolCity();
-	CrearArbolClient();
-	CrearArbolNumber();
-	cout << "Archivos creados e indexados exitosamente"<<endl;
 	bool continuar = true;
 	while(continuar){
-		cout << "1. Agregar\n2. Eliminar\n3. Modificar\n4. Listar\n5. Buscar\n6. Reindexar\n7. Visualizar Arbol\n8. Tarifa\n9. Compactar\n10. Salir"<<endl;
+		cout << "0. Crear\n1. Agregar\n2. Eliminar\n3. Modificar\n4. Listar\n5. Buscar\n6. Reindexar\n7. Visualizar Arbol\n8. Tarifa\n9. Compactar\n10. Salir"<<endl;
 		cin >> opcion;
 		switch(opcion){
+			case 0:{
+				cout << "1. Crear Binario\n2. Cargar"<<endl;
+				cin >> opcionCrear;
+				if(opcionCrear == 1){
+					CityToBinary();
+					ClientToBinary();
+					CallToBinary();
+					NumberToBinary();
+					cout << "Archivos creados exitosamente"<<endl;
+				}else{
+					IndexCity();
+					IndexClient();
+					IndexNumber();
+					CrearArbolCity();
+					CrearArbolClient();
+					CrearArbolNumber();
+					cout << "Archivos indexados exitosamente"<<endl;
+				}
+				
+			}break;
 			case 1:{//agregar
 				cout << "1. Ciudad\n2. Cliente\n3. Numero"<<endl;
 				cin >> opcionAdd;
@@ -119,16 +128,9 @@ int main(int argc, char* argv[]){
 				switch(opcionEliminar){
 					case 1:{
 						int Id=0;
-						while(Id != -1){
-							cout << "Ingrese el Id de la ciudad que desea borrar: ";
-							cin >> Id;
-							if (Id != -1)
-							{ 
-								borrarCity(Id);
-							}
-							
-						}
-						
+						cout << "Ingrese el Id de la ciudad que desea borrar: ";
+						cin >> Id;
+						borrarCity(Id);
 					}break;
 					case 2:{
 						long Id;
@@ -1086,6 +1088,8 @@ void agregarCity(){
 		for (int i = 0; i < sizeof(NameCiudad); i++){
 			NameCiudad[i] = leerDato[i];
 		}
+		stringstream ssRRNHeader;
+		ssRRNHeader << rrnHeader;
 		ofstream writeFile("Ciudades.bin", ofstream::in | ofstream :: out);
 		writeFile.seekp(HeaderSize + rrnHeader*( sizeof(IdCiudad) + sizeof(NameCiudad) )  );
 		writeFile.write(reinterpret_cast<char*>(&IdCiudad), sizeof(IdCiudad));
@@ -1095,6 +1099,7 @@ void agregarCity(){
 		writeFile.close();
 		int position = PosicionIngresoOrdenadoAlIndice( indexCityKey  , atoi(ss.str().c_str()) );
 		indexCityKey.insert(indexCityKey.begin()+ position, ss.str());
+		indexCityRRN.insert(indexCityRRN.begin()+ position, ssRRNHeader.str());
 		TreeCity.Agregar(Index(atol(ss.str().c_str()) , rrnHeader));
 	}else{
 		cout << "Ingrese el Id de la ciudad: ";
@@ -1116,7 +1121,9 @@ void agregarCity(){
 		}else{
 			writeFile.seekp(HeaderSize + recordNumber*( sizeof(IdCiudad) + sizeof(NameCiudad)) );
 		}
-		
+		stringstream ssRecordNumber;
+		ssRecordNumber << recordNumber;
+		int position = PosicionIngresoOrdenadoAlIndice( indexCityKey  , atoi(streamId.str().c_str()) );
 		writeFile.seekp(HeaderSize + recordNumber*( sizeof(IdCiudad) + sizeof(NameCiudad)) );
 		writeFile.write(reinterpret_cast<char*>(&IdCiudad), sizeof(IdCiudad));
 		writeFile.write(reinterpret_cast<char*>(&NameCiudad), sizeof(NameCiudad));
@@ -1124,6 +1131,8 @@ void agregarCity(){
 		writeFile.seekp(sizeof(int));
 		writeFile.write(reinterpret_cast<char*>(&recordNumber), sizeof(int));
 		writeFile.close();
+		indexCityKey.insert(indexCityKey.begin()+ position, streamId.str());
+		indexCityRRN.insert(indexCityRRN.begin()+ position, ssRecordNumber.str());
 		TreeCity.Agregar(Index(atol(streamId.str().c_str()) , recordNumber-1));
 	}
 }
@@ -1144,7 +1153,6 @@ void agregarClient(){
 		streamNombre << NameClient[i];
 	}
 	int newRRNHeader = atoi(streamNombre.str().c_str());
-	cout << newRRNHeader << "°|°" << endl;
 	readFile.close();
 	string leerName = "",leerId = "", leerGender = "",leerCiudad = "";
 	if(rrnHeader != -1){
@@ -1173,8 +1181,10 @@ void agregarClient(){
 		for (int i = 0; i < sizeof(IdCiudad); i++){
 			IdCiudad[i] = leerCiudad[i];
 		}
-
+		stringstream ssRRNHeader;
+		ssRRNHeader << rrnHeader;
 		ofstream writeFile("Clientes.bin", ofstream::in | ofstream :: out);
+		cout << "HOLA"<<endl;
 		writeFile.seekp(HeaderSize + rrnHeader*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad))  );
 		writeFile.write(reinterpret_cast<char*>(&IdClient), sizeof(IdClient));
 		writeFile.write(reinterpret_cast<char*>(&NameClient), sizeof(NameClient));
@@ -1184,7 +1194,11 @@ void agregarClient(){
 		writeFile.write(reinterpret_cast<char*>(&newRRNHeader), sizeof(newRRNHeader));
 		writeFile.close();
 		int position = PosicionIngresoOrdenadoAlIndice( indexClientKey  , atoi(ss.str().c_str()) );
+		cout << "HOLA1"<<endl;
 		indexClientKey.insert(indexClientKey.begin()+ position, ss.str());
+		cout << "HOLA2"<<endl;
+		indexClientRRN.insert(indexClientRRN.begin()+ position, ssRRNHeader.str());
+		cout << "HOLA3"<<endl;
 		TreeClient.Agregar(Index(atol(ss.str().c_str()) , rrnHeader));
 	}else{
 		cout << "Ingrese el Id del cliente: ";
@@ -1218,6 +1232,8 @@ void agregarClient(){
 		}else{
 			writeFile.seekp(HeaderSize + (recordNumber )*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad))  );
 		}
+		stringstream ssRecordNumber;
+		ssRecordNumber << recordNumber;
 		writeFile.seekp(HeaderSize + recordNumber*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad)) );
 		writeFile.write(reinterpret_cast<char*>(&IdClient), sizeof(IdClient));
 		writeFile.write(reinterpret_cast<char*>(&NameClient), sizeof(NameClient));
@@ -1227,6 +1243,9 @@ void agregarClient(){
 		writeFile.seekp(sizeof(int));
 		writeFile.write(reinterpret_cast<char*>(&recordNumber), sizeof(int));
 		writeFile.close();
+		int position = PosicionIngresoOrdenadoAlIndice( indexCityKey  , atoi(ss.str().c_str()) );
+		indexClientKey.insert(indexClientKey.begin()+ position, ss.str());
+		indexClientRRN.insert(indexClientRRN.begin()+ position, ssRecordNumber.str());
 		TreeClient.Agregar(Index(atol(ss.str().c_str()) , recordNumber-1));
 	}
 }
@@ -1261,6 +1280,8 @@ void agregarNumero(){
 		for (int i = 0; i < sizeof(Id); i++){
 			Id[i] = leerId[i];
 		}
+		stringstream ssRRNHeader;
+		ssRRNHeader << rrnHeader;
 		ofstream writeFile("Numeros.bin", ofstream::in | ofstream :: out);
 		writeFile.seekp(HeaderSize + rrnHeader*( sizeof(Numero) + sizeof(Id) )  );
 		writeFile.write(reinterpret_cast<char*>(&Numero), sizeof(Numero));
@@ -1270,6 +1291,7 @@ void agregarNumero(){
 		writeFile.close();
 		int position = PosicionIngresoOrdenadoAlIndice( indexNumberKey  , atoi(ss.str().c_str()) );
 		indexNumberKey.insert(indexNumberKey.begin()+ position, ss.str());
+		indexNumberRRN.insert(indexNumberRRN.begin()+ position, ssRRNHeader.str());
 		TreeNumber.Agregar(Index(atol(ss.str().c_str()) , rrnHeader));
 	}else{
 		cout << "Ingrese el numero: ";
@@ -1291,6 +1313,9 @@ void agregarNumero(){
 		}else{
 			writeFile.seekp(HeaderSize + (recordNumber)*( sizeof(Numero) + sizeof(Id))  );
 		}
+		stringstream ssRecordNumber;
+		ssRecordNumber << recordNumber;
+		int position = PosicionIngresoOrdenadoAlIndice( indexNumberKey  , atoi(ss.str().c_str()) );
 		writeFile.seekp(HeaderSize + recordNumber*( sizeof(Numero) + sizeof(Id)) );
 		writeFile.write(reinterpret_cast<char*>(&Numero), sizeof(Numero));
 		writeFile.write(reinterpret_cast<char*>(&Id), sizeof(Id));
@@ -1298,6 +1323,8 @@ void agregarNumero(){
 		writeFile.seekp(sizeof(int));
 		writeFile.write(reinterpret_cast<char*>(&recordNumber), sizeof(int));
 		writeFile.close();
+		indexNumberKey.insert(indexNumberKey.begin()+ position, ss.str());
+		indexNumberRRN.insert(indexNumberRRN.begin()+ position, ssRecordNumber.str());
 		TreeNumber.Agregar(Index(atol(ss.str().c_str()) , recordNumber-1));
 	}
 }
@@ -1395,9 +1422,14 @@ void buscarCityIndexado(int key){
 		string rrn = indexCityRRN.at(position);
 		readFile.seekg(HeaderSize + atoi((rrn).c_str())*( sizeof(IdCiudad) + sizeof(NameCiudad) ));
 		readFile.read(reinterpret_cast<char*>(&IdCiudad), sizeof(IdCiudad) );
-		readFile.read(reinterpret_cast<char*>(&NameCiudad), sizeof(NameCiudad) );		
-		cout << "Id Ciudad : " << IdCiudad <<endl;
-		cout << "Nombre de la ciudad: " << NameCiudad << endl;	
+		readFile.read(reinterpret_cast<char*>(&NameCiudad), sizeof(NameCiudad) );	
+		if(IdCiudad[0] != '*'){
+			cout << "Id Ciudad : " << IdCiudad <<endl;
+			cout << "Nombre de la ciudad: " << NameCiudad << endl;
+		}else{
+			cout << "El registro no se encuentra entre los datos."<<endl;
+		}
+			
 	}else
 		cout << "El registro no se encuentra entre los datos."<<endl;
 	
@@ -1416,14 +1448,18 @@ void buscarClientIndexado(unsigned long key){
 		readFile.read(reinterpret_cast<char*>(&IdClient), sizeof(IdClient) );
 		readFile.read(reinterpret_cast<char*>(&NameClient), sizeof(NameClient) );		
 		readFile.read(reinterpret_cast<char*>(&Gender), sizeof(Gender) );
-		readFile.read(reinterpret_cast<char*>(&IdCiudad), sizeof(IdCiudad) );		
-		cout << "Id Cliente : " << IdClient <<endl;
-		cout << "Nombre del cliente: " << NameClient << endl;	
-		cout << "Genero: " << Gender <<endl;
-		cout << "ID Ciudad: " << IdCiudad << endl;	
-	}else
+		readFile.read(reinterpret_cast<char*>(&IdCiudad), sizeof(IdCiudad) );	
+		if(IdClient[0] != '*'){
+			cout << "Id Cliente : " << IdClient <<endl;
+			cout << "Nombre del cliente: " << NameClient << endl;	
+			cout << "Genero: " << Gender <<endl;
+			cout << "ID Ciudad: " << IdCiudad << endl;
+		}else{
+			cout << "El registro no se encuentra entre los datos."<< endl;
+		}	
+	}else{
 		cout << "El registro no se encuentra entre los datos."<< endl;
-	
+	}
 	readFile.close();
 }
 void buscarNumberIndexado( int key){
@@ -1435,9 +1471,13 @@ void buscarNumberIndexado( int key){
 		string rrn = indexNumberRRN.at(position);
 		readFile.seekg(HeaderSize + atoi((rrn).c_str())*( sizeof(Numero) + sizeof(IdNumber) ));
 		readFile.read(reinterpret_cast<char*>(&Numero), sizeof(Numero) );
-		readFile.read(reinterpret_cast<char*>(&IdNumber), sizeof(IdNumber) );		
-		cout << "Numero: " << Numero <<endl;
-		cout << "Id del cliente: " << IdNumber << endl;	
+		readFile.read(reinterpret_cast<char*>(&IdNumber), sizeof(IdNumber) );	
+		if (Numero[0] != '*'){
+			cout << "Numero: " << Numero <<endl;
+			cout << "Id del cliente: " << IdNumber << endl;
+		}	else{
+			cout << "El registro no se encuentra entre los datos."<< endl;
+		}	
 	}else
 		cout << "El registro no se encuentra entre los datos."<< endl;
 	
@@ -1819,8 +1859,10 @@ int PosicionBusquedaOrdenadaAlIndiceLong(vector<string> indexKey  , unsigned lon
     	if(low > high)
     		break;    	
     	mid = (low + high)/2;
-    	if(key == atol((indexKey.at(mid)).c_str()) )
+    	if(key == atol((indexKey.at(mid)).c_str()) ){
     		return mid;
+    	}
+    		
     	if(key > atol((indexKey.at(mid)).c_str())){
     		if(mid != indexKey.size() - 1){
     			if(key < atol((indexKey.at(mid+1)).c_str())){
