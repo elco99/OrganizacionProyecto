@@ -856,7 +856,10 @@ void borrarCity( int key ){
 	readFile.close();
 	ofstream writeFile("Ciudades.bin", ios::out | ios::in);
 	if (position != -1){
-		IdCiudad[0] ='*';
+		for (int i = 0; i < sizeof(IdCiudad); ++i)
+		{
+			IdCiudad[i] = '*';
+		}
 		rrnToString<< rrnHeader;
 		for (int i = 0; i < rrnToString.str().size(); i++){
 			NameCiudad[i] = rrnToString.str()[i];
