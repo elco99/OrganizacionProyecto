@@ -81,9 +81,9 @@ int main(int argc, char* argv[]){
 	srand(time(0));
 	int opcion = 0,opcionAdd = 0,opcionEliminar = 0,opcionModificar = 0,opcionListar = 0, opcionBuscar =0, opcionReindexar = 0,opcionCompactar = 0;
 	int opcionListarArbol = 0;
-	/*CityToBinary();
+	CityToBinary();
 	ClientToBinary();
-	CallToBinary();*/
+	CallToBinary();
 	NumberToBinary();
 	IndexCity();
 	IndexClient();
@@ -731,7 +731,7 @@ void IndexCity(){
 		cout << "Key: " << indexCityKey.at(i) << " RRN: " << indexCityRRN.at(i)<< endl;
 	}*/
 	readFile.close();
-	writeIndexCity();
+	//writeIndexCity();
 	//ListIndex("IndexCity.bin");
 }
 void IndexClient(){
@@ -787,7 +787,7 @@ void IndexClient(){
 		cout << "Key: " << indexClientKey.at(i) << " RRN: " << indexClientRRN.at(i)<< endl;
 	}	*/
 	readFile.close();
-	writeIndexClient();
+	//writeIndexClient();
 }
 void IndexNumber(){
 	indexNumberKey.clear();
@@ -838,7 +838,7 @@ void IndexNumber(){
 		cout << "Key: " << indexNumberKey.at(i) << " RRN: " << indexNumberRRN.at(i)<< endl;
 	}	*/
 	readFile.close();
-	writeIndexNumber();
+	//writeIndexNumber();
 }
 //Eliminar
 void borrarCity( int key ){
