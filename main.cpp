@@ -844,7 +844,7 @@ void IndexNumber(){
 void borrarCity( int key ){
 	char IdCiudad[4];
 	char NameCiudad[40];
-	int position = PosicionBusquedaOrdenadaAlIndiceLong(indexCityKey, (long)key);
+	int position = PosicionIngresoOrdenadoAlIndice(indexCityKey, key);
 	string rrn = indexCityRRN.at(position);
 	int rrnInteger = atoi(rrn.c_str());
 	stringstream rrnToString;
@@ -852,7 +852,9 @@ void borrarCity( int key ){
 	ifstream readFile("Ciudades.bin", ios::binary);
 	readFile.seekg(0);
 	int rrnHeader;
+	int recordNumber;
 	readFile.read(reinterpret_cast<char*>(&rrnHeader), sizeof(int));
+	readFile.read(reinterpret_cast<char*>(&recordNumber), sizeof(int));
 	readFile.close();
 	ofstream writeFile("Ciudades.bin", ios::out | ios::in);
 	if (position != -1){
@@ -861,7 +863,11 @@ void borrarCity( int key ){
 		for (int i = 0; i < rrnToString.str().size(); i++){
 			NameCiudad[i] = rrnToString.str()[i];
 		}
-		writeFile.seekp(HeaderSize + atoi((rrn).c_str())*( sizeof(IdCiudad) + sizeof(NameCiudad) )  );
+		if(atoi(rrn.c_str()) == recordNumber){
+			writeFile.seekp(HeaderSize + (atoi((rrn).c_str()) -1)*( sizeof(IdCiudad) + sizeof(NameCiudad) )  );
+		}else{
+			writeFile.seekp(HeaderSize + (atoi((rrn).c_str()) )*( sizeof(IdCiudad) + sizeof(NameCiudad) )  );
+		}
 		writeFile.write(reinterpret_cast<char*>(&IdCiudad), sizeof(IdCiudad) );
 		writeFile.write(reinterpret_cast<char*>(&NameCiudad), sizeof(NameCiudad) );// se escribe el rrn en el header
 		writeFile.seekp(0);
@@ -870,7 +876,7 @@ void borrarCity( int key ){
 	indexCityKey.erase(indexCityKey.begin() +position);
 	indexCityRRN.erase(indexCityRRN.begin() +position);
 	TreeCity.Eliminar(Index( (unsigned long)key , atoi(rrn.c_str())));
-	writeFile.close();
+	writeFile.close();	
 }
 void borrarClient( long key ){
 	char IdClient[14];
@@ -883,8 +889,9 @@ void borrarClient( long key ){
 	stringstream rrnToString;
 	ifstream readFile("Clientes.bin", ios::binary);
 	readFile.seekg(0);
-	int rrnHeader;
+	int rrnHeader,recordNumber;
 	readFile.read(reinterpret_cast<char*>(&rrnHeader), sizeof(int));
+	readFile.read(reinterpret_cast<char*>(&recordNumber), sizeof(int));
 	readFile.close();
 	ofstream writeFile("Clientes.bin", ios::out | ios::in);
 	if (position != -1){
@@ -893,7 +900,12 @@ void borrarClient( long key ){
 		for (int i = 0; i < rrnToString.str().size(); i++){
 			NameClient[i] = rrnToString.str()[i];
 		}
-		writeFile.seekp(HeaderSize + atoi((rrn).c_str())*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad))  );
+		if(atoi(rrn.c_str()) == recordNumber){
+			writeFile.seekp(HeaderSize + (atoi((rrn).c_str()) -1)*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad))  );
+		}else{
+			writeFile.seekp(HeaderSize + (atoi((rrn).c_str()) )*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad))  );
+		}
+		//writeFile.seekp(HeaderSize + atoi((rrn).c_str())*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad))  );
 		writeFile.write(reinterpret_cast<char*>(&IdClient), sizeof(IdClient) );
 		writeFile.write(reinterpret_cast<char*>(&NameClient), sizeof(NameClient) );// se escribe el rrn en el header
 		writeFile.seekp(0);
@@ -914,19 +926,23 @@ void borrarNumber( int key ){
 	stringstream rrnToString;
 	ifstream readFile("Numeros.bin", ios::binary);
 	readFile.seekg(0);
-	int rrnHeader;
+	int rrnHeader,recordNumber;
 	readFile.read(reinterpret_cast<char*>(&rrnHeader), sizeof(int));
+	readFile.read(reinterpret_cast<char*>(&recordNumber), sizeof(int));
 	readFile.close();
 	ofstream writeFile("Numeros.bin", ios::out | ios::in);
 	if (position != -1){
 		Numero[0] ='*';
 		rrnToString<< rrnHeader;
-		for (int i = 0; i < rrnToString.str().size(); i++)
-		{
-
+		for (int i = 0; i < rrnToString.str().size(); i++){
 			Id[i] = rrnToString.str()[i];
 		}
-		writeFile.seekp(HeaderSize + atoi((rrn).c_str())*( sizeof(Numero) + sizeof(Id) )  );
+		if(atoi(rrn.c_str()) == recordNumber){
+			writeFile.seekp(HeaderSize + (atoi((rrn).c_str()) -1)*( sizeof(Numero) + sizeof(Id))  );
+		}else{
+			writeFile.seekp(HeaderSize + (atoi((rrn).c_str()) )*( sizeof(Numero) + sizeof(Id))  );
+		}
+		//writeFile.seekp(HeaderSize + atoi((rrn).c_str())*( sizeof(Numero) + sizeof(Id) )  );
 		writeFile.write(reinterpret_cast<char*>(&Numero), sizeof(Numero) );
 		writeFile.write(reinterpret_cast<char*>(&Id), sizeof(Id) );// se escribe el rrn en el header
 		writeFile.seekp(0);
@@ -1095,6 +1111,12 @@ void agregarCity(){
 			NameCiudad[i] = leerDato[i];
 		}
 		ofstream writeFile("Ciudades.bin", ofstream::in | ofstream::out);
+		if(rrnHeader == -1){
+			writeFile.seekp(HeaderSize + (recordNumber -1)*( sizeof(IdCiudad) + sizeof(NameCiudad) )  );
+		}else{
+			writeFile.seekp(HeaderSize + recordNumber*( sizeof(IdCiudad) + sizeof(NameCiudad)) );
+		}
+		
 		writeFile.seekp(HeaderSize + recordNumber*( sizeof(IdCiudad) + sizeof(NameCiudad)) );
 		writeFile.write(reinterpret_cast<char*>(&IdCiudad), sizeof(IdCiudad));
 		writeFile.write(reinterpret_cast<char*>(&NameCiudad), sizeof(NameCiudad));
@@ -1102,7 +1124,6 @@ void agregarCity(){
 		writeFile.seekp(sizeof(int));
 		writeFile.write(reinterpret_cast<char*>(&recordNumber), sizeof(int));
 		writeFile.close();
-		cout << atol(streamId.str().c_str()) << "||" << streamId.str()<<endl;
 		TreeCity.Agregar(Index(atol(streamId.str().c_str()) , recordNumber-1));
 	}
 }
@@ -1192,7 +1213,12 @@ void agregarClient(){
 			IdCiudad[i] = leerCiudad[i];
 		}
 		ofstream writeFile("Clientes.bin", ofstream::in | ofstream::out);
-		writeFile.seekp(HeaderSize + rrnHeader*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad)) );
+		if(rrnHeader == -1){
+			writeFile.seekp(HeaderSize + (recordNumber-1)*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad))  );
+		}else{
+			writeFile.seekp(HeaderSize + (recordNumber )*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad))  );
+		}
+		writeFile.seekp(HeaderSize + recordNumber*( sizeof(IdClient) + sizeof(NameClient) + sizeof(Gender) + sizeof(IdCiudad)) );
 		writeFile.write(reinterpret_cast<char*>(&IdClient), sizeof(IdClient));
 		writeFile.write(reinterpret_cast<char*>(&NameClient), sizeof(NameClient));
 		writeFile.write(reinterpret_cast<char*>(&Gender), sizeof(Gender));
@@ -1260,6 +1286,11 @@ void agregarNumero(){
 			Id[i] = leerId[i];
 		}
 		ofstream writeFile("Numeros.bin", ofstream::in | ofstream::out);
+		if(rrnHeader == -1){
+			writeFile.seekp(HeaderSize + (recordNumber-1)*( sizeof(Numero) + sizeof(Id))  );
+		}else{
+			writeFile.seekp(HeaderSize + (recordNumber)*( sizeof(Numero) + sizeof(Id))  );
+		}
 		writeFile.seekp(HeaderSize + recordNumber*( sizeof(Numero) + sizeof(Id)) );
 		writeFile.write(reinterpret_cast<char*>(&Numero), sizeof(Numero));
 		writeFile.write(reinterpret_cast<char*>(&Id), sizeof(Id));
