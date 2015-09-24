@@ -846,8 +846,10 @@ void IndexNumber(){
 void borrarCity( int key ){
 	char IdCiudad[4];
 	char NameCiudad[40];
-	int position = PosicionIngresoOrdenadoAlIndice(indexCityKey, key);
-	string rrn = indexCityRRN.at(position);
+	int position = PosicionBusquedaOrdenadaAlIndiceLong(indexCityKey,(long) key);
+	string rrn;
+	rrn = indexCityRRN.at(position);
+	
 	int rrnInteger = atoi(rrn.c_str());
 	stringstream rrnToString;
 	stringstream ss;
@@ -1866,10 +1868,13 @@ int PosicionBusquedaOrdenadaAlIndiceLong(vector<string> indexKey  , unsigned lon
     	if(key > atol((indexKey.at(mid)).c_str())){
     		if(mid != indexKey.size() - 1){
     			if(key < atol((indexKey.at(mid+1)).c_str())){
-    				return -1;
-    			}else{
-    				if(avoidInfiniteCicle && mid == indexKey.size()-2)
     					return -1;
+    				
+    			}else{
+    				if(avoidInfiniteCicle && mid == indexKey.size()-2){
+    					return -1;
+    				}
+    					
     				low = mid;
     				avoidInfiniteCicle = true;
     			}
@@ -1884,7 +1889,6 @@ int PosicionBusquedaOrdenadaAlIndiceLong(vector<string> indexKey  , unsigned lon
     	}else{
     		if(mid != 0){
     			if(key > atol((indexKey.at(mid-1)).c_str())){
-
     				return -1;
     			}else{
     				high = mid;
@@ -1899,6 +1903,7 @@ int PosicionBusquedaOrdenadaAlIndiceLong(vector<string> indexKey  , unsigned lon
     		}
     	}
     }
+
     return -1;
 }
 void CompactarCity(){
