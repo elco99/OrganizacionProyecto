@@ -844,7 +844,7 @@ void IndexNumber(){
 void borrarCity( int key ){
 	char IdCiudad[4];
 	char NameCiudad[40];
-	int position = PosicionIngresoOrdenadoAlIndice(indexCityKey, key);
+	int position = PosicionBusquedaOrdenadaAlIndiceLong(indexCityKey, (long)key);
 	string rrn = indexCityRRN.at(position);
 	int rrnInteger = atoi(rrn.c_str());
 	stringstream rrnToString;
@@ -856,10 +856,7 @@ void borrarCity( int key ){
 	readFile.close();
 	ofstream writeFile("Ciudades.bin", ios::out | ios::in);
 	if (position != -1){
-		for (int i = 0; i < sizeof(IdCiudad); ++i)
-		{
-			IdCiudad[i] = '*';
-		}
+		IdCiudad[0] ='*';
 		rrnToString<< rrnHeader;
 		for (int i = 0; i < rrnToString.str().size(); i++){
 			NameCiudad[i] = rrnToString.str()[i];
@@ -880,7 +877,7 @@ void borrarClient( long key ){
 	char NameClient[40];
 	char Gender[2];
 	char IdCiudad[4];
-	int position = PosicionIngresoOrdenadoAlIndiceLong(indexClientKey, key);
+	int position = PosicionBusquedaOrdenadaAlIndiceLong(indexClientKey, key);
 	string rrn = indexClientRRN.at(position);
 	int rrnInteger = atoi(rrn.c_str());
 	stringstream rrnToString;
@@ -911,7 +908,7 @@ void borrarNumber( int key ){
 	char Numero[9];
 	char Id[14];
 	
-	int position = PosicionIngresoOrdenadoAlIndice(indexNumberKey, key);
+	int position = PosicionBusquedaOrdenadaAlIndiceLong(indexNumberKey, (long)key);
 	string rrn = indexNumberRRN.at(position);
 	int rrnInteger = atoi(rrn.c_str());
 	stringstream rrnToString;
@@ -1360,7 +1357,7 @@ void buscarCityIndexado(int key){
 	char IdCiudad[4];
 	char NameCiudad[40];
 	
-	int position = PosicionBusquedaOrdenadaAlIndiceLong(indexCityKey, key);
+	int position = PosicionBusquedaOrdenadaAlIndiceLong(indexCityKey, (long)key);
 	ifstream readFile("Ciudades.bin", ios::binary);
 
 	if (position != -1){
@@ -1401,7 +1398,7 @@ void buscarClientIndexado(unsigned long key){
 void buscarNumberIndexado( int key){
 	char Numero[9];
 	char IdNumber[14];
-	int position = PosicionBusquedaOrdenadaAlIndiceLong(indexNumberKey, key);
+	int position = PosicionBusquedaOrdenadaAlIndiceLong(indexNumberKey, (long)key);
 	ifstream readFile("Numeros.bin", ios::binary);
 	if (position != -1){		
 		string rrn = indexNumberRRN.at(position);
